@@ -1,0 +1,14 @@
+FROM golang:1.14
+
+ENV PATH=$PATH:/usr/local/go/bin
+ENV GOROOT=/usr/local/go
+ENV GOPATH=/go
+ENV GOOS=darwin
+
+RUN mkdir -p $GOPATH/src/build/
+ADD ./PLACEHOLDER.go $GOPATH/src/build/
+WORKDIR $GOPATH/src/build/
+RUN go get ./...
+RUN go build -o PLACEHOLDER .
+
+CMD ["/bin/mv", "PLACEHOLDER", "/tmp/artefacts/"]
