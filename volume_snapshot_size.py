@@ -85,7 +85,7 @@ def arg_parse():
     parser.add_argument('-p','--profile',
                         metavar='Profile Name',
                         type=str,
-                        default='production',
+                        default='default',
                         help='AWS credentials profile name to use')
     parser.add_argument('-v','--volume-id',
                         metavar='Volume ID',
