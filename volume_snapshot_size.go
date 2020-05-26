@@ -67,7 +67,7 @@ func snapshots_size(region, profileName, snapshot1, snapshot2 string) (int64, er
     return int64(size) * *block_size, nil
 }
 
-func get_snapshots(region, profileName, volumeId string) error {
+func get_snapshots(region, profileName, volumeId, output string) error {
     sess, err := session.NewSessionWithOptions(session.Options{
                             Profile: profileName,
                             Config: aws.Config{
@@ -111,8 +111,15 @@ func get_snapshots(region, profileName, volumeId string) error {
             if err != nil {
                 return err
             }
-            message := fmt.Sprintf("Date: %-35s - ID: %s - Size: %s",
-                                   snap.StartTime, *snap.SnapshotId, ByteCountIEC(size))
+            var message string
+            switch output {
+            case "json":
+                message = fmt.Sprintf("{\"date\": \"%s\", \"id\": \"%s\", \"size\": \"%s\"}",
+                                        snap.StartTime, *snap.SnapshotId, ByteCountIEC(size))
+            default:
+                message = fmt.Sprintf("Date: %-35s - ID: %s - Size: %s",
+                                       snap.StartTime, *snap.SnapshotId, ByteCountIEC(size))
+            }
             fmt.Println(message)
         }
     }
@@ -123,9 +130,11 @@ func main() {
     var region string
     var profileName string
     var volumeId string
+    var output string
     flag.StringVar(&region, "r", "ca-central-1", "AWS region name")
     flag.StringVar(&profileName, "p", "default", "AWS config profile name")
     flag.StringVar(&volumeId, "v", "", "AWS volume id")
+    flag.StringVar(&output, "o", "text", "Output format")
     flag.Parse()
     flag.VisitAll(func (f *flag.Flag) {
         if f.Value.String() == "" {
@@ -134,7 +143,7 @@ func main() {
             os.Exit(1)
         }
     })
-    err := get_snapshots(region, profileName, volumeId)
+    err := get_snapshots(region, profileName, volumeId, output)
     if err != nil {
         os.Exit(2)
     }
