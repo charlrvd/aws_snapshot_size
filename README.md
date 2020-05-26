@@ -10,7 +10,7 @@ and the size of each of the snapshots using boto3 ebs.list_changed_blocks functi
 ```
 $ python volume_snapshot_size.py -h
 usage: volume_snapshot_size.py [-h] [-r Region Name] [-p Profile Name] -v
-                               Volume ID
+                               Volume ID [-o Output format]
 
 Get snapshots size based on an original volume ID
 
@@ -22,6 +22,8 @@ optional arguments:
                         AWS credentials profile name to use
   -v Volume ID, --volume-id Volume ID
                         Volume ID used to fetch snapshots that are based on it
+  -o Output format, --output Output format
+                        The output format in: [text, json]
 
 Example: python[3] snapshot_size.py [-r ca-central-1] [-v vol-foo42bar31baz]
 ```

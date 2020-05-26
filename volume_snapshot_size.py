@@ -1,5 +1,7 @@
 import boto3
 import argparse
+import json
+
 
 def snapshots_size(ebs, snap1, snap2):
     '''
@@ -35,6 +37,24 @@ def format_bytes(size):
     return f'{size} {power_labels[n]}b'
 
 
+def output(values, output):
+    '''
+    This function just format the output depending on the option
+    arguments:
+    :param values: the values that will be printed out
+    :type values: dict
+    :param output: the output type option
+    :type output: string
+    '''
+    switch = {
+                'text': f'Date: {values["date"]} - ID: {values["id"]} - Size: {values["size"]}',
+                'json': json.dumps(values, default=str),
+    }
+    if not output in switch:
+        output = 'text'
+    print(switch.get(output, f'Could not find output type {output}'))
+
+
 def vol_snapshots_size(**kwargs):
     '''
     Main function - will print the size of each snapshots based on a volume id
@@ -45,6 +65,8 @@ def vol_snapshots_size(**kwargs):
     :type region: string
     :param volume_id: the volume id to query snapshots size
     :type volume_id: string
+    :param output: the output format to use in [text, json]
+    :type output: string
     '''
     ec2 = session.client('ec2', region_name=kwargs['region'])
     ebs = session.client('ebs', region_name=kwargs['region'])
@@ -63,7 +85,8 @@ def vol_snapshots_size(**kwargs):
     for i in range(len(sorted_snapshots)-1):
         snap = sorted_snapshots[i]
         diff_size = snapshots_size(ebs, sorted_snapshots[i]["SnapshotId"], sorted_snapshots[i+1]["SnapshotId"])
-        print(f'Date: {snap["StartTime"]} - ID: {snap["SnapshotId"]} - Size: {format_bytes(diff_size)}')
+        out = {'date': snap["StartTime"], 'id': snap["SnapshotId"], 'size': format_bytes(diff_size)}
+        output(out, kwargs['output'])
 
 
 def arg_parse():
@@ -92,6 +115,11 @@ def arg_parse():
                         type=str,
                         required=True,
                         help='Volume ID used to fetch snapshots that are based on it')
+    parser.add_argument('-o','--output',
+                        metavar='Output format',
+                        type=str,
+                        default='text',
+                        help='The output format in: [text, json]')
     return parser.parse_args()
 
 
@@ -102,4 +130,8 @@ if __name__ == '__main__':
 
     # create session
     session = boto3.Session(profile_name=args.profile)
-    vol_snapshots_size(session=session, region=args.region, volume_id=args.volume_id)
+    vol_snapshots_size(
+                        session=session,
+                        region=args.region,
+                        volume_id=args.volume_id,
+                        output=args.output)
