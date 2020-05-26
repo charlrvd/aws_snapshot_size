@@ -42,7 +42,7 @@ Date: 2020-05-25 07:46:02.454 +0000 UTC   - ID: snap-0d27999a3afffc6db - Size: 6
 
 ## build the go version
 
-This can be done via the small bash (script)[build_binary.sh]
+This can be done via the small bash [script](build_binary.sh)
 Remove the line with `GOOS=darwin` if not compiling for mac
 Otherwise just
 ```
