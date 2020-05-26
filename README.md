@@ -42,10 +42,18 @@ Date: 2020-05-25 07:46:02.454 +0000 UTC   - ID: snap-0d27999a3afffc6db - Size: 6
 
 ## build the go version
 
-This can be done via the small bash (script)[build_binary.sh]
+This can be done via the small bash [script](build_binary.sh)
 Remove the line with `GOOS=darwin` if not compiling for mac
 Otherwise just
 ```
 go get ./...
 go build -o volume_snapshot_size volume_snapshot_size.go
 ```
+
+
+### Test with session.Session as function argument in go
+
+Testing to see if sending the session object as function argument in go would have an impact.
+It looks like the time to execute is greatly improved as it takes about 4 seconds to check about 15 snapshots
+while it only took arround 1-2 seconds with session creation inside the functions
+

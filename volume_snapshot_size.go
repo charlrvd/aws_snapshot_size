@@ -40,19 +40,8 @@ func ByteCountIEC(b int64) string {
         float64(b)/float64(div), "KMGTPE"[exp])
 }
 
-func snapshots_size(region, profileName, snapshot1, snapshot2 string) (int64, error) {
-    sess, err := session.NewSessionWithOptions(session.Options{
-                            Profile: profileName,
-                            Config: aws.Config{
-                                Region: aws.String(region),
-                            },
-                        })
-    if err != nil {
-        fmt.Println("Error creation aws session")
-        fmt.Println(err)
-        return 0, err
-    }
-    svc := ebs.New(sess)
+func snapshots_size(session *session.Session, snapshot1, snapshot2 string) (int64, error) {
+    svc := ebs.New(session)
     input := &ebs.ListChangedBlocksInput{
         FirstSnapshotId: aws.String(snapshot1),
         SecondSnapshotId: aws.String(snapshot2),
@@ -67,19 +56,8 @@ func snapshots_size(region, profileName, snapshot1, snapshot2 string) (int64, er
     return int64(size) * *block_size, nil
 }
 
-func get_snapshots(region, profileName, volumeId string) error {
-    sess, err := session.NewSessionWithOptions(session.Options{
-                            Profile: profileName,
-                            Config: aws.Config{
-                                Region: aws.String(region),
-                            },
-                        })
-    if err != nil {
-        fmt.Println("Error creation aws session")
-        fmt.Println(err)
-        return err
-    }
-    svc := ec2.New(sess)
+func get_snapshots(session *session.Session, volumeId string) error {
+    svc := ec2.New(session)
     input := &ec2.DescribeSnapshotsInput{
         Filters: []*ec2.Filter{
             {
@@ -107,7 +85,7 @@ func get_snapshots(region, profileName, volumeId string) error {
     //fmt.Println(result)
     for i, snap := range result.Snapshots {
         if i < len(result.Snapshots)-1 {
-            size, err := snapshots_size(region, profileName, *snap.SnapshotId, *result.Snapshots[i+1].SnapshotId)
+            size, err := snapshots_size(session, *snap.SnapshotId, *result.Snapshots[i+1].SnapshotId)
             if err != nil {
                 return err
             }
@@ -134,8 +112,20 @@ func main() {
             os.Exit(1)
         }
     })
-    err := get_snapshots(region, profileName, volumeId)
+    sess, err := session.NewSessionWithOptions(session.Options{
+                            Profile: profileName,
+                            Config: aws.Config{
+                                Region: aws.String(region),
+                            },
+                        })
     if err != nil {
+        fmt.Println("Error creation aws session")
+        fmt.Println(err)
+        os.Exit(1)
+    }
+    snapshotErr := get_snapshots(sess, volumeId)
+    if snapshotErr != nil {
+        fmt.Println(snapshotErr)
         os.Exit(2)
     }
 }
