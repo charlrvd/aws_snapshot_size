@@ -46,6 +46,6 @@ This can be done via the small bash (script)[build_binary.sh]
 Remove the line with `GOOS=darwin` if not compiling for mac
 Otherwise just
 ```
-RUN go get ./...
-RUN go build -o volume_snapshot_size volume_snapshot_size.go
+go get ./...
+go build -o volume_snapshot_size volume_snapshot_size.go
 ```
