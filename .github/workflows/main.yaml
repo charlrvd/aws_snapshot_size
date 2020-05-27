@@ -5,7 +5,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Get go dependancies
-      run: go get ./...
+      uses: actions/setup-go@v2
+      with:
+        goo-version: 1.14.x
     - name: Checkout
       uses: actions/checkout@v2
     - name: Run golangci-lint
