@@ -15,6 +15,7 @@ jobs:
     - name: go get dep
       run: go get -v -t -d ./...
     - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v1
-      with:
-        version: v1.27
+      uses: actions-contrib/golangci-lint@v1
+#      uses: golangci/golangci-lint-action@v1
+#      with:
+#        version: v1.27
