@@ -20,6 +20,8 @@ jobs:
         echo $PATH
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        path: src/github.com/${{ github.repository }}
     - name: go get
       run: go get -v -u ./...
     - name: Run golangci-lint
