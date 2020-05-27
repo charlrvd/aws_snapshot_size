@@ -10,6 +10,7 @@ import (
     "fmt"
     "flag"
     "os"
+    "errors" // add unused to make sure linting raises it
 )
 
 // error handler function based on the aws golang doc
