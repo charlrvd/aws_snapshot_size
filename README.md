@@ -38,8 +38,8 @@ Date: 2020-05-24 07:53:01.767000+00:00 - ID: snap-0d27999a3afffc6db - Size: 65.0
 ---
 # with go
 ./volume_snapshot_size -r us-east-1 -p dev -v vol-42123456789 -o json
-{"date": "2020-05-25 12:32:25.06 +0000 UTC", "id": "snap-0cbd26ced80126b16", "size": "3.0 MiB"}
-{"date": "2020-05-25 07:46:02.454 +0000 UTC", "id": "snap-0d27999a3afffc6db", "size": "41.5 MiB"}
+{"snapshot-date":"2020-05-25T12:32:25.06Z","snapshot-id":"snap-0cbd26ced80126b16","snapshot-size":"3.0 MiB"}
+{"snapshot-date":"2020-05-25T07:46:02.454Z","snapshot-id":"snap-0d27999a3afffc6db","snapshot-size":"41.5 MiB"}
 ```
 
 ## build the go version
@@ -50,4 +50,7 @@ Otherwise just
 ```
 go get ./...
 go build -o volume_snapshot_size volume_snapshot_size.go
+
+# or with the dockerfile
+bash build_binary.sh volume_snapshot_size
 ```

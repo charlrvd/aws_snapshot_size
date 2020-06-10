@@ -9,10 +9,18 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
+	"time"
 )
+
+type resultJsonFormat struct {
+	Date *time.Time `json:"snapshot-date"`
+	Id   string     `json:"snapshot-id"`
+	Size string     `json:"snapshot-size"`
+}
 
 // error handler function based on the aws golang doc
 func aws_err(err error) {
@@ -119,8 +127,11 @@ func get_snapshots(region, profileName, volumeId, output string) error {
 			var message string
 			switch output {
 			case "json":
-				message = fmt.Sprintf("{\"date\": \"%s\", \"id\": \"%s\", \"size\": \"%s\"}",
-					snap.StartTime, *snap.SnapshotId, ByteCountIEC(size))
+				jsonBuf, _ := json.Marshal(resultJsonFormat{
+					Date: snap.StartTime,
+					Id:   *snap.SnapshotId,
+					Size: ByteCountIEC(size)})
+				message = string(jsonBuf)
 			default:
 				message = fmt.Sprintf("Date: %-35s - ID: %s - Size: %s",
 					snap.StartTime, *snap.SnapshotId, ByteCountIEC(size))
