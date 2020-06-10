@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ebs"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
+	log "github.com/sirupsen/logrus"
+
 	"flag"
 	"fmt"
 	"os"
@@ -17,10 +19,12 @@ func aws_err(err error) {
 	if aerr, ok := err.(awserr.Error); ok {
 		switch aerr.Code() {
 		default:
-			fmt.Println(aerr.Error())
+			log.Error(aerr.Error())
 		}
 	} else {
-		fmt.Println(err.Error())
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("AWS API call error")
 	}
 }
 
@@ -48,8 +52,9 @@ func snapshots_size(region, profileName, snapshot1, snapshot2 string) (int64, er
 		},
 	})
 	if err != nil {
-		fmt.Println("Error creation aws session")
-		fmt.Println(err)
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Error creating aws session")
 		return 0, err
 	}
 	svc := ebs.New(sess)
@@ -75,8 +80,9 @@ func get_snapshots(region, profileName, volumeId, output string) error {
 		},
 	})
 	if err != nil {
-		fmt.Println("Error creation aws session")
-		fmt.Println(err)
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Error creation aws session")
 		return err
 	}
 	svc := ec2.New(sess)
@@ -104,7 +110,6 @@ func get_snapshots(region, profileName, volumeId, output string) error {
 		aws_err(err)
 		return err
 	}
-	//fmt.Println(result)
 	for i, snap := range result.Snapshots {
 		if i < len(result.Snapshots)-1 {
 			size, err := snapshots_size(region, profileName, *snap.SnapshotId, *result.Snapshots[i+1].SnapshotId)
@@ -127,6 +132,11 @@ func get_snapshots(region, profileName, volumeId, output string) error {
 }
 
 func main() {
+	// setup log
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.InfoLevel)
+
+	// cli flags
 	var region string
 	var profileName string
 	var volumeId string
@@ -139,12 +149,14 @@ func main() {
 	flag.VisitAll(func(f *flag.Flag) {
 		if f.Value.String() == "" {
 			message := fmt.Sprintf("Missing argument (%s)", f.Name)
-			fmt.Println(message)
-			os.Exit(1)
+			log.Fatal(message)
 		}
 	})
+
 	err := get_snapshots(region, profileName, volumeId, output)
 	if err != nil {
-		os.Exit(2)
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Execution failure")
 	}
 }
